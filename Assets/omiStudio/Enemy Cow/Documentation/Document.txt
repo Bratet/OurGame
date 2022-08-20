@@ -1,0 +1,12 @@
+Hello guys
+In this package, we have two monsters(PSB) that include three animations. 
+To control these animations, we used a parameter called state.
+0 - Idle
+1 -  Walk
+2 - Run
+
+
+Support by gb.zend@gmail.com
+omiStudio
+
+Cheers
