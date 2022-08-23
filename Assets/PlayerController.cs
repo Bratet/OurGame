@@ -14,39 +14,64 @@ public class PlayerController : MonoBehaviour
 
     Vector2 movementInput;
     Rigidbody2D rb;
+    SpriteRenderer spriteRenderer;
+    Animator animator;
     List<RaycastHit2D> castCollisions = new List<RaycastHit2D>();
+
+    bool canMove = true;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void FixedUpdate()
     {
-        if(movementInput != Vector2.zero)
+        if (canMove)
         {
-            bool sucess = TryMove(movementInput);
-
-            if(!sucess)
+            if(movementInput != Vector2.zero)
             {
-                sucess = TryMove(new Vector2(movementInput.x, 0));
+                bool sucess = TryMove(movementInput);
 
+                if(!sucess)
+                {
+                    sucess = TryMove(new Vector2(movementInput.x, 0));
+                }
                 if (!sucess)
                 {
                     sucess = TryMove(new Vector2(0, movementInput.y));
                 }
+
+                animator.SetBool("IsMoving", sucess);
+            }
+            else
+            {
+                animator.SetBool("IsMoving", false);
+            }
+
+            if (movementInput.x < 0)
+            {
+                spriteRenderer.flipX = true;
+            } else if (movementInput.x > 0)
+            {
+                spriteRenderer.flipX = false;
             }
         }
     }
 
     private bool TryMove(Vector2 direction)
-    {
-        int count = rb.Cast(movementInput, movementFilter, castCollisions, moveSpeed * Time.fixedDeltaTime + collisionOffset);
+    {   
+        if(direction != Vector2.zero)
+        {
+        
+        int count = rb.Cast(direction, movementFilter, castCollisions, moveSpeed * Time.fixedDeltaTime + collisionOffset);
 
             if (count == 0)
             {
-                rb.MovePosition(rb.position + movementInput * moveSpeed * Time.fixedDeltaTime);
+                rb.MovePosition(rb.position + direction * moveSpeed * Time.fixedDeltaTime);
 
                 return true;
             }
@@ -54,10 +79,30 @@ public class PlayerController : MonoBehaviour
             {
                 return false;
             }
+        }
+        else
+        {
+            return false;
+        }
     }
 
     void OnMove(InputValue movementValue)
     {
         movementInput = movementValue.Get<Vector2>();
+    }
+
+    void OnFire()
+    {
+        animator.SetTrigger("SwordAttack");
+    }
+
+    public void LockMovement()
+    {
+        canMove = false;
+    }
+
+    public void UnlockMovement()
+    {
+        canMove = true;
     }
 }
